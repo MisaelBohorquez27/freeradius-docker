@@ -1,1 +1,198 @@
-📚 GUÍA COMPLETA - FASES 1 A 4\n=====================================\n\nFreeRADIUS Docker - Autenticación WiFi Empresarial\nÚltima actualización: 28 de Abril de 2026\n\n=====================================\n🎯 VISIÓN GENERAL\n=====================================\n\nEsta implementación te proporciona una solución completa de RADIUS \npara autenticación WiFi empresarial WPA2-Enterprise con Microsoft \nActive Directory, monitoreo en tiempo real y alta disponibilidad.\n\nArquitectura:\n  Dispositivos WiFi → Omada Controller → FreeRADIUS → Active Directory\n\n=====================================\n📋 FASES IMPLEMENTADAS\n=====================================\n\n✅ FASE 1: SEGURIDAD BÁSICA\n   └─ Completada\n   └─ Certificados TLS autofirmados\n   └─ clients.conf securizado (IP específica + secret fuerte)\n   └─ Docker compose con volúmenes persistentes\n   └─ Logging con rotación automática\n\n✅ FASE 2: INTEGRACIÓN LDAP/AD\n   └─ Completada (archivos de configuración listos)\n   └─ ldap.conf con todos los parámetros\n   └─ Búsqueda de usuarios en AD\n   └─ Sincronización de grupos\n   └─ ⚠️ TODO: Cambiar valores a tu AD real\n\n✅ FASE 3: EAP Y WiFi ENTERPRISE\n   └─ Completada (archivos de configuración listos)\n   └─ eap.conf para PEAP-MSCHAPv2\n   └─ Certificados para WPA2-Enterprise\n   └─ OMADA-SETUP.md con pasos de configuración\n   └─ ⚠️ TODO: Aplicar en Omada Controller\n\n✅ FASE 4: PRODUCCIÓN\n   └─ Completada (archivos de configuración listos)\n   └─ docker-compose.production.yml (HA)\n   └─ Monitoreo con Prometheus + Grafana\n   └─ Alertas con Alertmanager\n   └─ Backup automático\n   └─ ⚠️ TODO: Cambiar credenciales y endpoints\n\n=====================================\n🔐 CREDENCIALES GENERADAS (ALEATORIAS)\n=====================================\n\n⚠️ IMPORTANTE: Cambiar TODAS estas credenciales a valores reales:\n\nLDAP (radius_service):\n  Password: K7xZ9mP2wN5qR8tL3vQ6bY1jF4sH0nM9\n  → Cambiar en: radius/mods-enabled/ldap.conf\n  → Cambiar en: docker-compose.production.yml\n\nGrafana (admin):\n  Password: P9mL2kR7jF4bN1w5tH3x\n  → Cambiar en: docker-compose.production.yml\n  → Cambiar en: Grafana UI después de login\n\nRADIUS Secret (Omada ↔ FreeRADIUS):\n  Secret: W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p\n  → Cambiar en: radius/clients.conf\n  → Cambiar en: OMADA-SETUP.md\n  → Cambiar en: docker-compose.production.yml\n  → Debe coincidir en Omada Controller\n\nEmail Alerts:\n  Email: alertas@empresa.local\n  Password: P8x9nL2qR3jF5bM1kW4v\n  → Cambiar en: monitoring/alertmanager.yml\n\n=====================================\n📁 ESTRUCTURA DEL PROYECTO FINAL\n=====================================\n\nfreeradius-docker/\n├── 📄 Dockerfile                    (✓ Fase 1)\n├── 📄 docker-compose.yml            (✓ Fase 1 - desarrollo)\n├── 📄 docker-compose.production.yml (✓ Fase 4 - producción con HA)\n├── 📄 README.md                     (Documentación general)\n├── 📄 CHECKLIST.md                  (Validación Fase 1)\n├── 📄 FASE1-COMPLETADO.txt          (Resumen Fase 1)\n├── 📄 FASES-REFERENCIA.md           (Este archivo)\n├── 📄 OMADA-SETUP.md                (✓ Fase 3 - Configuración Omada)\n│\n├── 📁 radius/                       (Configuración FreeRADIUS)\n│   ├── clients.conf                 (✓ Fase 1 - Clientes RADIUS)\n│   ├── users                        (Base de usuarios local - TEMPORAL)\n│   ├── mods-enabled/\n│   │   ├── ldap.conf                (✓ Fase 2 - LDAP/AD)\n│   │   ├── eap.conf                 (✓ Fase 3 - EAP-PEAP)\n│   │   └── ldap.conf.example        (Referencia)\n│   └── mods-config/\n│\n├── 📁 certs/                        (Certificados TLS)\n│   ├── ca.crt                       (✓ Generado en Fase 1)\n│   ├── ca.key                       (✓ Generado en Fase 1)\n│   ├── server.crt                   (✓ Generado en Fase 1)\n│   └── server.key                   (✓ Generado en Fase 1)\n│\n├── 📁 logs/                         (Logs persistentes)\n│   ├── primary/\n│   ├── secondary/\n│   └── radius.log\n│\n├── 📁 backups/                      (✓ Fase 4 - Backups automáticos)\n│   ├── freeradius_backup_*.tar.gz\n│   └── backup.log\n│\n├── 📁 scripts/\n│   ├── backup.sh                    (✓ Fase 4 - Backup automático)\n│   ├── monitor.sh                   (✓ Fase 4 - Monitoreo)\n│   ├── validate-phase1.sh           (✓ Fase 1 - Validación)\n│   └── generate-certs.sh            (✓ Fase 1 - Generador de certs)\n│\n└── 📁 monitoring/                   (✓ Fase 4 - Monitoreo y Alertas)\n    ├── prometheus.yml               (Configuración Prometheus)\n    ├── alertmanager.yml             (Configuración de alertas)\n    ├── rules/\n    │   └── freeradius_alerts.yml    (Reglas de alertas)\n    └── grafana/\n        └── provisioning/\n            ├── dashboards/          (Dashboards preconfigurads)\n            └── datasources/         (Fuentes de datos)\n\n=====================================\n🚀 CÓMO USAR CADA FASE\n=====================================\n\n═══════════════════════════════════════════════════════════\nFASE 1: SEGURIDAD BÁSICA (YA COMPLETA)\n═══════════════════════════════════════════════════════════\n\n1. Generar Certificados:\n   $ bash scripts/generate-certs.sh\n\n2. Cambiar IP del Omada:\n   $ vim radius/clients.conf\n   → Cambiar ipaddr = 192.168.1.100 a IP real\n\n3. Validar:\n   $ bash scripts/validate-phase1.sh\n\n4. Levantar (desarrollo):\n   $ mkdir -p logs\n   $ docker-compose up -d\n   $ docker logs -f freeradius\n\n═══════════════════════════════════════════════════════════\nFASE 2: INTEGRACIÓN LDAP/ACTIVE DIRECTORY\n═══════════════════════════════════════════════════════════\n\n✅ Archivo: radius/mods-enabled/ldap.conf\n\nPasos:\n\n1. Cambiar servidor LDAP:\n   server = \"dc01.example.local\"\n           ↓\n   server = \"[TU_DOMAIN_CONTROLLER]\"\n\n2. Cambiar credenciales de servicio:\n   bind_dn = \"CN=radius_service,OU=ServiceAccounts,DC=example,DC=local\"\n   bind_password = \"K7xZ9mP2wN5qR8tL3vQ6bY1jF4sH0nM9\"  # ⚠️ CAMBIAR\n\n3. Cambiar base DN:\n   base_dn = \"OU=Users,DC=example,DC=local\"\n           ↓\n   base_dn = \"[TU_BASE_DN]\"\n\n4. Probar conexión LDAP (desde contenedor):\n   $ docker exec -it freeradius bash\n   $ ldapwhoami -H ldap://dc01.example.local -D \"CN=radius_service,...\" -W\n\n5. Probar autenticación:\n   $ radtest usuario@domain.com contraseña 127.0.0.1 0 W4nP7k...\n\n═══════════════════════════════════════════════════════════\nFASE 3: EAP Y WIFI ENTERPRISE\n═══════════════════════════════════════════════════════════\n\n✅ Archivo: radius/mods-enabled/eap.conf\n✅ Guía: OMADA-SETUP.md\n\nPasos:\n\n1. Verificar certificados TLS:\n   $ ls -la certs/\n   → Deben existir: ca.crt, ca.key, server.crt, server.key\n\n2. Configurar Omada Controller (manual):\n   a) Settings → Authentication → RADIUS\n      - RADIUS Server: [IP_DEL_FREERADIUS]\n      - RADIUS Port Auth: 1812\n      - Shared Secret: W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p  # ⚠️ CAMBIAR\n   \n   b) Create SSID con WPA2-Enterprise\n      - Security: WPA2-Enterprise\n      - Authentication: Seleccionar RADIUS\n      - EAP Method: PEAP\n      - Inner EAP: MSCHAPv2\n\n3. Probar con dispositivo WiFi:\n   - SSID: Enterprise_Network\n   - Usuario: usuario@domain.com\n   - Contraseña: contraseña de AD\n   - Validación de certificado: Confiar en CA autofirmada\n\n4. Ver logs de autenticación:\n   $ docker logs -f freeradius | grep -i \"access\\|peap\"\n\n═══════════════════════════════════════════════════════════\nFASE 4: PRODUCCIÓN (ALTA DISPONIBILIDAD)\n═══════════════════════════════════════════════════════════\n\n✅ Archivo: docker-compose.production.yml\n✅ Monitoreo: monitoring/ (Prometheus + Grafana)\n✅ Alertas: monitoring/alertmanager.yml\n✅ Backup: scripts/backup.sh\n\nPasos:\n\n1. Cambiar credenciales en docker-compose.production.yml:\n   - FREERADIUS_SECRET\n   - Grafana ADMIN_PASSWORD\n   - Email SMTP\n\n2. Configurar alertas en monitoring/alertmanager.yml:\n   - SMTP server\n   - Email destino\n   - Slack webhook (opcional)\n\n3. Levantar ambiente de producción:\n   $ mkdir -p logs/primary logs/secondary backups\n   $ docker-compose -f docker-compose.production.yml up -d\n\n4. Verificar servicios:\n   $ docker ps | grep -E \"freeradius|prometheus|grafana\"\n\n5. Acceder a interfaces:\n   - Prometheus: http://localhost:9090\n   - Grafana: http://localhost:3000 (admin / cambiar contraseña)\n   - Alertmanager: http://localhost:9093\n\n6. Configurar Grafana:\n   a) Login: admin / P9mL2kR7jF4bN1w5tH3x\n   b) Add Data Source: Prometheus (http://prometheus:9090)\n   c) Import Dashboards:\n      - ID 1860 (Node Exporter)\n      - ID 3662 (Prometheus)\n      - Custom: FreeRADIUS\n\n7. Backup automático (cron):\n   $ crontab -e\n   # Agregar:\n   0 2 * * * cd /path/to/freeradius && bash scripts/backup.sh\n\n8. Monitoreo manual:\n   $ bash scripts/monitor.sh freeradius-primary\n\n=====================================\n⚠️ CREDENCIALES A CAMBIAR - CHECKLIST\n=====================================\n\n□ LDAP bind_password\n  Archivo: radius/mods-enabled/ldap.conf\n  Actual: K7xZ9mP2wN5qR8tL3vQ6bY1jF4sH0nM9\n  Cambiar a: [tu_contraseña_real]\n\n□ RADIUS Secret (compartido Omada ↔ FreeRADIUS)\n  Archivos:\n    - radius/clients.conf\n    - docker-compose.production.yml (FREERADIUS_SECRET)\n    - OMADA-SETUP.md\n  Actual: W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p\n  Cambiar a: [tu_secret_fuerte_32_caracteres]\n  ⚠️ DEBE coincidir en Omada Controller\n\n□ Grafana Admin Password\n  Archivo: docker-compose.production.yml\n  Actual: P9mL2kR7jF4bN1w5tH3x\n  Cambiar a: [nueva_contraseña]\n  Action: docker-compose exec grafana grafana-cli admin reset-admin-password\n\n□ SMTP Email for Alerts\n  Archivo: monitoring/alertmanager.yml\n  Actual: alertas@empresa.local / P8x9nL2qR3jF5bM1kW4v\n  Cambiar a: [tu_email] / [tu_app_password]\n  SMTP: [tu_servidor_smtp]\n\n□ Email Destinatarios\n  Archivo: monitoring/alertmanager.yml\n  Actual: admin@empresa.local, sysadmin@empresa.local, etc\n  Cambiar a: [tus_emails]\n\n=====================================\n🔍 VALIDACIONES Y TESTING\n=====================================\n\nValidación Fase 1:\n$ bash scripts/validate-phase1.sh\n\nTest de Conectividad RADIUS:\n$ docker exec -it freeradius bash\n$ radtest usuario@domain 12345 127.0.0.1 0 W4nP7k...\n\nTest de LDAP (si Fase 2):\n$ docker exec -it freeradius bash\n$ ldapwhoami -H ldap://dc01 -D \"CN=radius_service,...\" -W\n\nMonitoreo Fase 4:\n$ bash scripts/monitor.sh freeradius-primary\n\nVer Logs:\n$ docker logs -f freeradius-primary\n$ docker logs -f freeradius-secondary\n$ tail -f logs/radius.log\n\nVer Métricas Prometheus:\nhttp://localhost:9090/graph\n\nVer Alertas Grafana:\nhttp://localhost:3000 → Alerting → Alert Rules\n\nVer Alertas Generadas:\nhttp://localhost:9093\n\n=====================================\n📊 MÉTRICAS CLAVE A MONITOREAR\n=====================================\n\nDisponibilidad:\n  - FreeRADIUS Primary/Secondary UP\n  - Puerto 1812 escuchando\n  - Respuesta < 100ms\n\nRendimiento:\n  - CPU < 80%\n  - Memoria < 85%\n  - Conexiones LDAP activas\n\nAutenticación:\n  - Auth-Accept rate\n  - Auth-Reject rate\n  - Promedio de respuesta\n\nAlmacenamiento:\n  - Espacio en disco > 10%\n  - Backups completados\n  - Logs rotados\n\n=====================================\n🆘 TROUBLESHOOTING RÁPIDO\n=====================================\n\nProblema: \"RADIUS rechaza todas las autenticaciones\"\nSolución:\n  1. Verificar secret coincida: grep secret radius/clients.conf\n  2. Verificar IP del Omada: grep ipaddr radius/clients.conf\n  3. Ver logs: docker logs freeradius | grep -i reject\n  4. Verificar usuario en AD: ldapwhoami -D \"uid=usuario,...\"\n\nProblema: \"FreeRADIUS se cae frecuentemente\"\nSolución:\n  1. Ver logs: docker logs freeradius\n  2. Aumentar memoria: deploy.resources.limits.memory\n  3. Revisar carga: docker stats freeradius\n  4. Revisar LDAP queries: grep -i timeout logs/radius.log\n\nProblema: \"Alertas no llegan\"\nSolución:\n  1. Verificar SMTP: telnet smtp.server 587\n  2. Verificar contraseña: cat monitoring/alertmanager.yml | grep password\n  3. Ver logs: docker logs alertmanager-freeradius\n  4. Probar alerta manual: amtool alert add test\n\nProblema: \"Memoria de Prometheus muy grande\"\nSolución:\n  1. Reducir retention: storage.tsdb.retention.time=7d\n  2. Limpiar datos: rm -rf ./prometheus-data\n  3. Aumentar espacio: expandir volumen Docker\n\n=====================================\n📚 REFERENCIAS ÚTILES\n=====================================\n\nDocumentación Oficial:\n  - FreeRADIUS: https://freeradius.org/\n  - Prometheus: https://prometheus.io/docs/\n  - Grafana: https://grafana.com/docs/\n  - Alertmanager: https://prometheus.io/docs/alerting/latest/\n\nRFCs:\n  - RFC 2865: RADIUS Protocol\n  - RFC 2548: Microsoft RADIUS Extensions\n  - RFC 3748: EAP Authentication Protocol\n\nTutoriales:\n  - WPA2-Enterprise: https://wiki.gentoo.org/wiki/WPA_supplicant\n  - LDAP Queries: https://tools.ietf.org/html/rfc4515\n\n=====================================\n✅ PRÓXIMOS PASOS\n=====================================\n\n1. Cambiar TODAS las credenciales marcadas con ⚠️\n2. Probar Fase 1 en desarrollo (docker-compose.yml)\n3. Validar integridad (bash scripts/validate-phase1.sh)\n4. Completar Fase 2 (LDAP/AD)\n5. Completar Fase 3 (Omada WiFi)\n6. Lanzar Fase 4 (Producción con HA)\n7. Configurar backups automáticos\n8. Entrenar equipo en monitoreo\n9. Documentar procedimientos de recuperación\n10. Testing de failover\n\n=====================================\n📝 NOTAS FINALES\n=====================================\n\n- Este setup está listo para PRODUCCIÓN después de:\n  ✓ Cambiar credenciales\n  ✓ Validar en staging\n  ✓ Configurar notificaciones\n  ✓ Testing de failover\n\n- Mantener backups regulares (ejecutar backup.sh)\n\n- Monitorear métricas en Grafana\n\n- Revisar alertas diariamente\n\n- Documentar cambios en Git\n\n- Capacitar al equipo en procedimientos\n\n=====================================\nFin de la Guía\n=====================================\n"
+---
+title: "Guía Completa FreeRADIUS Docker"
+author: "Infraestructura WiFi Empresarial"
+date: "28 de Abril de 2026"
+output: html_document
+---
+
+# 📚 GUÍA COMPLETA - FASES 1 A 4
+
+FreeRADIUS Docker - Autenticación WiFi Empresarial  
+
+---
+
+# 🎯 VISIÓN GENERAL
+
+Esta implementación te proporciona una solución completa de RADIUS para autenticación WiFi empresarial WPA2-Enterprise con Microsoft Active Directory, monitoreo en tiempo real y alta disponibilidad.
+
+**Arquitectura:**
+
+Dispositivos WiFi → Omada Controller → FreeRADIUS → Active Directory
+
+---
+
+# 📋 FASES IMPLEMENTADAS
+
+## ✅ FASE 1: SEGURIDAD BÁSICA
+- Certificados TLS autofirmados  
+- clients.conf securizado (IP específica + secret fuerte)  
+- Docker compose con volúmenes persistentes  
+- Logging con rotación automática  
+
+## ✅ FASE 2: INTEGRACIÓN LDAP/AD
+- ldap.conf con todos los parámetros  
+- Búsqueda de usuarios en AD  
+- Sincronización de grupos  
+- ⚠️ TODO: Cambiar valores a tu AD real  
+
+## ✅ FASE 3: EAP Y WIFI ENTERPRISE
+- eap.conf para PEAP-MSCHAPv2  
+- Certificados para WPA2-Enterprise  
+- OMADA-SETUP.md  
+- ⚠️ TODO: Aplicar en Omada Controller  
+
+## ✅ FASE 4: PRODUCCIÓN
+- docker-compose.production.yml (HA)  
+- Monitoreo con Prometheus + Grafana  
+- Alertas con Alertmanager  
+- Backup automático  
+- ⚠️ TODO: Cambiar credenciales y endpoints  
+
+---
+
+# 🔐 CREDENCIALES (⚠️ CAMBIAR)
+
+LDAP (radius_service)  
+Password: `K7xZ9mP2wN5qR8tL3vQ6bY1jF4sH0nM9`
+
+Grafana (admin)  
+Password: `P9mL2kR7jF4bN1w5tH3x`
+
+RADIUS Secret  
+`W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p`
+
+Email Alerts  
+`alertas@empresa.local`
+
+---
+
+# 📁 ESTRUCTURA DEL PROYECTO
+
+```bash
+freeradius-docker/
+├── Dockerfile
+├── docker-compose.yml
+├── docker-compose.production.yml
+├── README.md
+├── CHECKLIST.md
+├── FASES-REFERENCIA.md
+├── OMADA-SETUP.md
+├── radius/
+│   ├── clients.conf
+│   ├── users
+│   ├── mods-enabled/
+│   │   ├── ldap.conf
+│   │   ├── eap.conf
+│   └── mods-config/
+├── certs/
+├── logs/
+├── backups/
+├── scripts/
+└── monitoring/
+
+🚀 FASE 1: SEGURIDAD BÁSICA
+bash scripts/generate-certs.sh
+vim radius/clients.conf
+bash scripts/validate-phase1.sh
+mkdir -p logs
+docker-compose up -d
+docker logs -f freeradius
+🔗 FASE 2: LDAP / ACTIVE DIRECTORY
+
+Editar archivo:
+
+vim radius/mods-enabled/ldap.conf
+
+Probar conexión LDAP:
+
+docker exec -it freeradius bash
+ldapwhoami -H ldap://dc01.example.local -D "CN=radius_service" -W
+
+Test de autenticación:
+
+radtest usuario@domain.com contraseña 127.0.0.1 0 SECRET
+📡 FASE 3: WIFI ENTERPRISE
+
+Configurar en Omada:
+
+WPA2-Enterprise
+RADIUS Server: IP del VPS
+Puerto: 1812
+EAP: PEAP
+Inner: MSCHAPv2
+
+Ver logs:
+
+docker logs -f freeradius | grep -i access
+🏭 FASE 4: PRODUCCIÓN
+mkdir -p logs/primary logs/secondary backups
+docker-compose -f docker-compose.production.yml up -d
+docker ps
+
+Accesos:
+
+Prometheus → http://localhost:9090
+Grafana → http://localhost:3000
+Alertmanager → http://localhost:9093
+⚠️ CHECKLIST DE SEGURIDAD
+ Cambiar LDAP password
+ Cambiar RADIUS Secret
+ Cambiar credenciales Grafana
+ Configurar SMTP
+ Ajustar emails
+🔍 VALIDACIONES
+bash scripts/validate-phase1.sh
+
+Test RADIUS:
+
+docker exec -it freeradius bash
+radtest usuario password 127.0.0.1 0 SECRET
+
+Logs:
+
+docker logs -f freeradius
+tail -f logs/radius.log
+📊 MÉTRICAS
+CPU < 80%
+RAM < 85%
+Auth success rate
+Tiempo de respuesta < 100ms
+🆘 TROUBLESHOOTING
+Rechazo de autenticación
+grep secret radius/clients.conf
+docker logs freeradius | grep reject
+Caídas del servicio
+docker stats freeradius
+Alertas no funcionan
+docker logs alertmanager
+📚 REFERENCIAS
+FreeRADIUS
+Prometheus
+Grafana
+RFC 2865
+RFC 3748
+✅ PRÓXIMOS PASOS
+Cambiar credenciales
+Validar entorno
+Integrar AD
+Configurar WiFi
+Desplegar producción
+Configurar backups
+Monitoreo
+📝 NOTAS FINALES
+Listo para producción tras validación
+Mantener backups regulares
+Revisar métricas en Grafana
+Documentar cambios en Git
+
+Fin de la guía
+
+
+---
+
+Ahora sí 👌  
+👉 Esto lo puedes copiar tal cual como archivo `.Rmd` y renderizar sin errores.
+
+Si quieres, el siguiente nivel sería:
+- convertirlo en **documentación tipo empresa (con diagramas y CI/CD)**
+- o revisar tu repo real y decirte exactamente qué está mal (que es lo más útil ahora mismo)
