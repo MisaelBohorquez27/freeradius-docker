@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  freeradius:
+    build: .
+    container_name: freeradius
+    
+    # =============================================================
+    # VOLÚMENES: Persistencia de configuración, logs y certificados
+    # =============================================================
+    volumes:
+      # Configuración de FreeRADIUS (solo lectura en producción)
+      - ./radius:/etc/freeradius/3.0:ro
+      
+      # Logs persistentes (para auditoría y troubleshooting)
+      - ./logs:/var/log/freeradius
+      
+      # Certificados TLS (PEAP, EAP-TLS)
+      - ./certs:/etc/freeradius/3.0/certs:ro
+    
+    # =============================================================
+    # PUERTOS: Autenticación (1812) y Accounting (1813)
+    # =============================================================
+    ports:
+      - "1812:1812/udp"  # RADIUS Authentication
+      - "1813:1813/udp"  # RADIUS Accounting
+    
+    # =============================================================
+    # REDES: Comunicación entre servicios
+    # =============================================================
+    networks:
+      - freeradius-network
+    
+    # =============================================================
+    # VARIABLES DE ENTORNO
+    # =============================================================
+    environment:
+      - FREERADIUS_LOG_LEVEL=info
+    
+    # =============================================================
+    # POLÍTICAS DE REINICIO
+    # =============================================================
+    restart: always
+    
+    # =============================================================
+    # LOGGING: Rotación automática de logs
+    # =============================================================
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    
+    # =============================================================
+    # HEALTHCHECK: Verificación periódica de salud
+    # =============================================================
+    # Nota: radtest debe estar disponible en la imagen
+    # healthcheck:
+    #   test: ["CMD", "radtest", "testuser", "1234", "127.0.0.1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+
+# =============================================================
+# REDES PERSONALIZADAS
+# =============================================================
+networks:
+  freeradius-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
