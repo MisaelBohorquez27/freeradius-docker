@@ -1,1 +1,318 @@
-🚀 INICIO RÁPIDO - FASES 1-4 COMPLETADAS\n==========================================\n\n✅ TODO YA ESTÁ LISTO\n\nTu arquitectura FreeRADIUS está 100% implementada con todas las \nfases de seguridad, integración y producción.\n\nÚnicamente DEBES cambiar las credenciales a valores REALES.\n\n==========================================\n📋 CREDENCIALES A CAMBIAR (LISTA RÁPIDA)\n==========================================\n\n1. LDAP Service Account Password\n   📄 Archivo: radius/mods-enabled/ldap.conf\n   🔍 Buscar: bind_password = \"K7xZ9mP2wN5qR8tL3vQ6bY1jF4sH0nM9\"\n   ✏️  Cambiar a: [tu_contraseña_real]\n\n2. RADIUS Secret (CRÍTICO - debe coincidir en Omada)\n   📄 Archivos:\n      - radius/clients.conf\n      - docker-compose.production.yml\n      - OMADA-SETUP.md\n   🔍 Buscar: W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p\n   ✏️  Cambiar TODOS a: [tu_secret_fuerte]\n   ⚠️  DEBE COINCIDIR en Omada Controller\n\n3. IP del Omada Controller\n   📄 Archivo: radius/clients.conf\n   🔍 Buscar: ipaddr = 192.168.1.100\n   ✏️  Cambiar a: [IP_REAL_DE_TU_OMADA]\n\n4. LDAP Server Address\n   📄 Archivo: radius/mods-enabled/ldap.conf\n   🔍 Buscar: server = \"dc01.example.local\"\n   ✏️  Cambiar a: [TU_DOMAIN_CONTROLLER]\n\n5. Grafana Admin Password\n   📄 Archivo: docker-compose.production.yml\n   🔍 Buscar: GF_SECURITY_ADMIN_PASSWORD=P9mL2kR7jF4bN1w5tH3x\n   ✏️  Cambiar a: [nueva_contraseña_segura]\n\n6. SMTP Alertas (para notificaciones)\n   📄 Archivo: monitoring/alertmanager.yml\n   Cambiar:\n     - smtp_smarthost: 'smtp.gmail.com:587'\n     - smtp_auth_username: 'alertas@empresa.local'\n     - smtp_auth_password: 'P8x9nL2qR3jF5bM1kW4v'\n     - smtp_from: 'freeradius-alerts@empresa.local'\n     - to: 'admin@empresa.local'\n   ✏️  Todos a: [tus_valores_reales]\n\n==========================================\n🎯 PLAN DE ACCIÓN (EN ORDEN)\n==========================================\n\n PASO 1: Reemplazar Credenciales (10 min)\n ────────────────────────────────────────\n □ Abrir cada archivo marcado arriba\n □ Buscar y reemplazar valores\n □ Guardar cambios\n\n PASO 2: Validar Configuración (5 min)\n ────────────────────────────────────────\n $ bash scripts/validate-phase1.sh\n\n PASO 3: Levantar Desarrollo (Fase 1-3) (10 min)\n ────────────────────────────────────────────────\n $ bash scripts/generate-certs.sh\n $ mkdir -p logs\n $ docker-compose up -d\n $ docker logs -f freeradius\n\n PASO 4: Verificar Funcionamiento (10 min)\n ──────────────────────────────────────────\n $ docker exec -it freeradius bash\n $ radtest testuser 1234 127.0.0.1 0 W4nP7k...\n  (Debe responder: \"Access-Accept\")\n\n PASO 5: Configurar Omada (MANUAL)\n ──────────────────────────────────\n a) Omada → Settings → Authentication → RADIUS\n    - Server IP: [IP_DE_TU_FREERADIUS]\n    - Port: 1812\n    - Secret: [MISMO_QUE_PUSISTE_ARRIBA]\n \n b) Crear SSID WiFi Enterprise\n    - Nombre: \"Enterprise_Network\"\n    - Seguridad: WPA2-Enterprise\n    - RADIUS: Seleccionar servidor arriba\n    - EAP Method: PEAP\n    - Inner EAP: MSCHAPv2\n\n c) Probar con dispositivo WiFi\n    - Usuario: usuario@tudominio.com\n    - Contraseña: contraseña de AD\n    - Certificado: Confiar en CA\n\n PASO 6: Completar Fase 2 (LDAP/AD)\n ──────────────────────────────────\n Cuando estés listo a conectar con AD:\n a) Cambiar todos los valores en:\n    - radius/mods-enabled/ldap.conf\n    - docker-compose.production.yml\n \n b) Reiniciar contenedor:\n    $ docker-compose restart freeradius\n \n c) Probar autenticación LDAP:\n    $ docker logs -f freeradius | grep -i ldap\n\n PASO 7: Lanzar Fase 4 (Producción HA)\n ──────────────────────────────────────\n Cuando estés en producción:\n a) Cambiar credenciales en:\n    - docker-compose.production.yml\n    - monitoring/alertmanager.yml\n \n b) Levantar con HA:\n    $ docker-compose -f docker-compose.production.yml up -d\n \n c) Acceder a interfaces:\n    - Prometheus: http://localhost:9090\n    - Grafana: http://localhost:3000\n    - Alertmanager: http://localhost:9093\n\n==========================================\n📁 ARCHIVOS MÁS IMPORTANTES\n==========================================\n\n📖 FASES-REFERENCIA.md\n    └─ Guía completa de todas las fases\n    └─ Instrucciones detalladas\n    └─ Troubleshooting\n    └─ LEE ESTO PRIMERO\n\n📖 OMADA-SETUP.md\n    └─ Cómo configurar Omada Controller\n    └─ Pasos para crear WiFi Enterprise\n    └─ Testing de conectividad\n\n📖 README.md\n    └─ Documentación general\n    └─ Estructura del proyecto\n    └─ Comandos útiles\n\n🐳 docker-compose.yml\n    └─ Para DESARROLLO (Fase 1-3)\n    └─ Servidor único\n    └─ Básico\n\n🐳 docker-compose.production.yml\n    └─ Para PRODUCCIÓN (Fase 4)\n    └─ HA (2 servidores)\n    └─ Con monitoreo\n    └─ Con alertas\n    └─ Con backup\n\n📝 radius/clients.conf\n    └─ Configuración del Omada (cambiar IP)\n    └─ CRÍTICO: Secret debe coincidir\n\n📝 radius/mods-enabled/ldap.conf\n    └─ Configuración LDAP/AD\n    └─ Cambiar servidor, usuario, contraseña\n\n📝 radius/mods-enabled/eap.conf\n    └─ Configuración EAP-PEAP\n    └─ Certificados TLS para WiFi\n\n🔧 scripts/backup.sh\n    └─ Backup automático (Fase 4)\n\n🔧 scripts/monitor.sh\n    └─ Monitoreo manual (Fase 4)\n\n🔧 scripts/validate-phase1.sh\n    └─ Validar configuración\n\n🔧 scripts/generate-certs.sh\n    └─ Generar certificados TLS\n\n📊 monitoring/prometheus.yml\n    └─ Configuración Prometheus\n\n📊 monitoring/alertmanager.yml\n    └─ Configuración de alertas\n    └─ CAMBIAR email SMTP\n\n📊 monitoring/rules/freeradius_alerts.yml\n    └─ Reglas de alertas\n    └─ CPU, memoria, autenticación\n\n==========================================\n🔑 CREDENCIALES ACTUALES (CAMBIAR)\n==========================================\n\nLDAP:\n  Usuario: CN=radius_service,OU=ServiceAccounts,DC=example,DC=local\n  Contraseña: K7xZ9mP2wN5qR8tL3vQ6bY1jF4sH0nM9\n\nRADIUS Secret (Omada ↔ FreeRADIUS):\n  Valor: W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p\n  DEBE coincidir en Omada\n\nGrafana:\n  Usuario: admin\n  Contraseña: P9mL2kR7jF4bN1w5tH3x\n\nEmail Alertas:\n  Usuario: alertas@empresa.local\n  Contraseña: P8x9nL2qR3jF5bM1kW4v\n  SMTP: smtp.gmail.com:587\n\n==========================================\n⚡ COMANDOS RÁPIDOS\n==========================================\n\n# Desarrollo (Fase 1-3)\ndocker-compose up -d               # Levantar\ndocker logs -f freeradius          # Ver logs\ndocker ps | grep freeradius        # Verificar\ndocker-compose down                # Detener\n\n# Producción (Fase 4)\ndocker-compose -f docker-compose.production.yml up -d\ndocker ps | grep freeradius        # Ver ambos\ndocker logs -f freeradius-primary  # Primary\ndocker logs -f freeradius-secondary # Secondary\n\n# Validación\nbash scripts/validate-phase1.sh     # Validar config\nbash scripts/generate-certs.sh      # Generar certs\nbash scripts/monitor.sh              # Monitoreo manual\nbash scripts/backup.sh               # Backup manual\n\n# Pruebas\ndocker exec -it freeradius bash\nradtest usuario 12345 127.0.0.1 0 W4nP7k...\nldapwhoami -H ldap://dc01 -D \"CN=radius_service,...\" -W\n\n# Interfaces\nPrometheus:   http://localhost:9090\nGrafana:      http://localhost:3000\nAlertmanager: http://localhost:9093\n\n# Logs\ntail -f logs/radius.log\ngrep -i error logs/radius.log\ngrep -i reject logs/radius.log\n\n==========================================\n✅ CHECKLIST FINAL\n==========================================\n\n□ Cambiar LDAP password\n□ Cambiar RADIUS secret (3 archivos)\n□ Cambiar IP Omada\n□ Cambiar LDAP server\n□ Cambiar Grafana password\n□ Cambiar SMTP email/password\n□ Generar certificados (generate-certs.sh)\n□ Validar configuración (validate-phase1.sh)\n□ Levantar con docker-compose up -d\n□ Ver logs: docker logs -f freeradius\n□ Configurar Omada Controller (manual)\n□ Probar WiFi Enterprise con dispositivo\n□ Lanzar docker-compose.production.yml\n□ Acceder a Grafana y configurar dashboards\n□ Configurar alertas SMTP\n□ Hacer commit en Git\n\n==========================================\n📞 SI NECESITAS AYUDA\n==========================================\n\n1. Lee: FASES-REFERENCIA.md (guía completa)\n2. Lee: OMADA-SETUP.md (configuración Omada)\n3. Ver logs: docker logs -f freeradius\n4. Ver configuración: cat radius/clients.conf\n5. Ejecutar validación: bash scripts/validate-phase1.sh\n\nProblemas comunes:\n\n❌ \"RADIUS authentication failed\"\n   ✓ Verificar secret coincida exactamente\n   ✓ Verificar IP del Omada es correcta\n   ✓ Ver logs: docker logs freeradius | grep -i reject\n\n❌ \"Can't connect to LDAP\"\n   ✓ Verificar servidor LDAP\n   ✓ Verificar contraseña de radius_service\n   ✓ Verificar conectividad: ping dc01.example.local\n\n❌ \"Certificate validation failed\"\n   ✓ Desactivar validación en cliente (testing)\n   ✓ O confiar en CA autofirmada\n   ✓ O usar certificado de CA real en producción\n\n==========================================\n🎉 ¡LISTO PARA COMENZAR!\n==========================================\n\nTu infraestructura está 100% implementada.\n\nSiguiente: Cambiar credenciales y comenzar con PASO 1.\n\nEsperado:\n- 30 minutos: Cambiar credenciales + validar\n- 1 hora: Testing en desarrollo\n- 1 hora: Configurar Omada\n- 2 horas: Testing WiFi\n- 1 hora: Lanzar producción\n\nTotal: ~6 horas para estar operativo.\n\n¡A por ello! 🚀\n"
+🚀 INICIO RÁPIDO - FASES 1-4 COMPLETADAS
+==========================================
+
+✅ TODO YA ESTÁ LISTO
+
+Tu arquitectura FreeRADIUS está 100% implementada con todas las
+fases de seguridad, integración y producción.
+
+Únicamente DEBES cambiar las credenciales a valores REALES.
+
+==========================================
+📋 CREDENCIALES A CAMBIAR (LISTA RÁPIDA)
+==========================================
+
+1. LDAP Service Account Password
+   📄 Archivo: radius/mods-enabled/ldap.conf
+   🔍 Buscar: bind_password = "K7xZ9mP2wN5qR8tL3vQ6bY1jF4sH0nM9
+   ✏️  Cambiar a: [tu_contraseña_real]
+
+2. RADIUS Secret (CRÍTICO - debe coincidir en Omada)
+   📄 Archivos:
+      - radius/clients.conf
+      - docker-compose.production.yml
+      - OMADA-SETUP.md
+   🔍 Buscar: W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p
+   ✏️  Cambiar TODOS a: [tu_secret_fuerte]
+   ⚠️  DEBE COINCIDIR en Omada Controller
+
+3. IP del Omada Controller
+   📄 Archivo: radius/clients.conf
+   🔍 Buscar: ipaddr = 192.168.1.100
+   ✏️  Cambiar a: [IP_REAL_DE_TU_OMADA]
+
+4. LDAP Server Address
+   📄 Archivo: radius/mods-enabled/ldap.conf
+   🔍 Buscar: server = "dc01.example.local"
+   ✏️  Cambiar a: [TU_DOMAIN_CONTROLLER]
+
+5. Grafana Admin Password
+   📄 Archivo: docker-compose.production.yml
+   🔍 Buscar: GF_SECURITY_ADMIN_PASSWORD=P9mL2kR7jF4bN1w5tH3x
+   ✏️  Cambiar a: [nueva_contraseña_segura]
+
+6. SMTP Alertas (para notificaciones)
+   📄 Archivo: monitoring/alertmanager.yml
+   Cambiar:
+     - smtp_smarthost: 'smtp.gmail.com:587'
+     - smtp_auth_username: 'alertas@empresa.local'
+     - smtp_auth_password: 'P8x9nL2qR3jF5bM1kW4v'
+     - smtp_from: 'freeradius-alerts@empresa.local'
+     - to: 'admin@empresa.local'
+   ✏️  Todos a: [tus_valores_reales]
+
+==========================================
+🎯 PLAN DE ACCIÓN (EN ORDEN)
+==========================================
+
+ PASO 1: Reemplazar Credenciales (10 min)
+ ────────────────────────────────────────
+ □ Abrir cada archivo marcado arriba
+ □ Buscar y reemplazar valores
+ □ Guardar cambios
+
+ PASO 2: Validar Configuración (5 min)
+ ────────────────────────────────────────
+ $ bash scripts/validate-phase1.sh
+
+ PASO 3: Levantar Desarrollo (Fase 1-3) (10 min)
+ ────────────────────────────────────────────────
+ $ bash scripts/generate-certs.sh
+ $ mkdir -p logs
+ $ docker-compose up -d
+ $ docker logs -f freeradius
+
+ PASO 4: Verificar Funcionamiento (10 min)
+ ──────────────────────────────────────────
+ $ docker exec -it freeradius bash
+ $ radtest testuser 1234 127.0.0.1 0 W4nP7k...
+  (Debe responder: "Access-Accept")
+
+ PASO 5: Configurar Omada (MANUAL)
+ ──────────────────────────────────
+ a) Omada → Settings → Authentication → RADIUS
+    - Server IP: [IP_DE_TU_FREERADIUS]
+    - Port: 1812
+    - Secret: [MISMO_QUE_PUSISTE_ARRIBA]
+ 
+ b) Crear SSID WiFi Enterprise
+    - Nombre: "Enterprise_Network"
+    - Seguridad: WPA2-Enterprise
+    - RADIUS: Seleccionar servidor arriba
+    - EAP Method: PEAP
+    - Inner EAP: MSCHAPv2
+
+ c) Probar con dispositivo WiFi
+    - Usuario: usuario@tudominio.com
+    - Contraseña: contraseña de AD
+    - Certificado: Confiar en CA
+
+ PASO 6: Completar Fase 2 (LDAP/AD)
+ ──────────────────────────────────
+ Cuando estés listo a conectar con AD:
+ a) Cambiar todos los valores en:
+    - radius/mods-enabled/ldap.conf
+    - docker-compose.production.yml
+ 
+ b) Reiniciar contenedor:
+    $ docker-compose restart freeradius
+ 
+ c) Probar autenticación LDAP:
+    $ docker logs -f freeradius | grep -i ldap
+
+ PASO 7: Lanzar Fase 4 (Producción HA)
+ ──────────────────────────────────────
+ Cuando estés en producción:
+ a) Cambiar credenciales en:
+    - docker-compose.production.yml
+    - monitoring/alertmanager.yml
+ 
+ b) Levantar con HA:
+    $ docker-compose -f docker-compose.production.yml up -d
+ 
+ c) Acceder a interfaces:
+    - Prometheus: http://localhost:9090
+    - Grafana: http://localhost:3000
+    - Alertmanager: http://localhost:9093
+
+==========================================
+📁 ARCHIVOS MÁS IMPORTANTES
+==========================================
+
+📖 FASES-REFERENCIA.md
+    └─ Guía completa de todas las fases
+    └─ Instrucciones detalladas
+    └─ Troubleshooting
+    └─ LEE ESTO PRIMERO
+
+📖 OMADA-SETUP.md
+    └─ Cómo configurar Omada Controller
+    └─ Pasos para crear WiFi Enterprise
+    └─ Testing de conectividad
+
+📖 README.md
+    └─ Documentación general
+    └─ Estructura del proyecto
+    └─ Comandos útiles
+
+🐳 docker-compose.yml
+    └─ Para DESARROLLO (Fase 1-3)
+    └─ Servidor único
+    └─ Básico
+
+🐳 docker-compose.production.yml
+    └─ Para PRODUCCIÓN (Fase 4)
+    └─ HA (2 servidores)
+    └─ Con monitoreo
+    └─ Con alertas
+    └─ Con backup
+
+📝 radius/clients.conf
+    └─ Configuración del Omada (cambiar IP)
+    └─ CRÍTICO: Secret debe coincidir
+
+📝 radius/mods-enabled/ldap.conf
+    └─ Configuración LDAP/AD
+    └─ Cambiar servidor, usuario, contraseña
+
+📝 radius/mods-enabled/eap.conf
+    └─ Configuración EAP-PEAP
+    └─ Certificados TLS para WiFi
+
+🔧 scripts/backup.sh
+    └─ Backup automático (Fase 4)
+
+🔧 scripts/monitor.sh
+    └─ Monitoreo manual (Fase 4)
+
+🔧 scripts/validate-phase1.sh
+    └─ Validar configuración
+
+🔧 scripts/generate-certs.sh
+    └─ Generar certificados TLS
+
+📊 monitoring/prometheus.yml
+    └─ Configuración Prometheus
+
+📊 monitoring/alertmanager.yml
+    └─ Configuración de alertas
+    └─ CAMBIAR email SMTP
+
+📊 monitoring/rules/freeradius_alerts.yml
+    └─ Reglas de alertas
+    └─ CPU, memoria, autenticación
+
+==========================================
+🔑 CREDENCIALES ACTUALES (CAMBIAR)
+==========================================
+
+LDAP:
+  Usuario: CN=radius_service,OU=ServiceAccounts,DC=example,DC=local
+  Contraseña: K7xZ9mP2wN5qR8tL3vQ6bY1jF4sH0nM9
+
+RADIUS Secret (Omada ↔ FreeRADIUS):
+  Valor: W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p
+  DEBE coincidir en Omada
+
+Grafana:
+  Usuario: admin
+  Contraseña: P9mL2kR7jF4bN1w5tH3x
+
+Email Alertas:
+  Usuario: alertas@empresa.local
+  Contraseña: P8x9nL2qR3jF5bM1kW4v
+  SMTP: smtp.gmail.com:587
+
+==========================================
+⚡ COMANDOS RÁPIDOS
+==========================================
+
+# Desarrollo (Fase 1-3)
+docker-compose up -d               # Levantar
+docker logs -f freeradius          # Ver logs
+docker ps | grep freeradius        # Verificar
+docker-compose down                # Detener
+
+# Producción (Fase 4)
+docker-compose -f docker-compose.production.yml up -d
+docker ps | grep freeradius        # Ver ambos
+docker logs -f freeradius-primary  # Primary
+docker logs -f freeradius-secondary # Secondary
+
+# Validación
+bash scripts/validate-phase1.sh     # Validar config
+bash scripts/generate-certs.sh      # Generar certs
+bash scripts/monitor.sh              # Monitoreo manual
+bash scripts/backup.sh               # Backup manual
+
+# Pruebas
+docker exec -it freeradius bash
+radtest usuario 12345 127.0.0.1 0 W4nP7k...
+ldapwhoami -H ldap://dc01 -D "CN=radius_service,..." -W
+
+# Interfaces
+Prometheus:   http://localhost:9090
+Grafana:      http://localhost:3000
+Alertmanager: http://localhost:9093
+
+# Logs
+tail -f logs/radius.log
+grep -i error logs/radius.log
+grep -i reject logs/radius.log
+
+==========================================
+✅ CHECKLIST FINAL
+==========================================
+
+□ Cambiar LDAP password
+□ Cambiar RADIUS secret (3 archivos)
+□ Cambiar IP Omada
+□ Cambiar LDAP server
+□ Cambiar Grafana password
+□ Cambiar SMTP email/password
+□ Generar certificados (generate-certs.sh)
+□ Validar configuración (validate-phase1.sh)
+□ Levantar con docker-compose up -d
+□ Ver logs: docker logs -f freeradius
+□ Configurar Omada Controller (manual)
+□ Probar WiFi Enterprise con dispositivo
+□ Lanzar docker-compose.production.yml
+□ Acceder a Grafana y configurar dashboards
+□ Configurar alertas SMTP
+□ Hacer commit en Git
+
+==========================================
+📞 SI NECESITAS AYUDA
+==========================================
+
+1. Lee: FASES-REFERENCIA.md (guía completa)
+2. Lee: OMADA-SETUP.md (configuración Omada)
+3. Ver logs: docker logs -f freeradius
+4. Ver configuración: cat radius/clients.conf
+5. Ejecutar validación: bash scripts/validate-phase1.sh
+
+Problemas comunes:
+
+❌ "RADIUS authentication failed"
+   ✓ Verificar secret coincida exactamente
+   ✓ Verificar IP del Omada es correcta
+   ✓ Ver logs: docker logs freeradius | grep -i reject
+
+❌ "Can't connect to LDAP"
+   ✓ Verificar servidor LDAP
+   ✓ Verificar contraseña de radius_service
+   ✓ Verificar conectividad: ping dc01.example.local
+
+❌ "Certificate validation failed"
+   ✓ Desactivar validación en cliente (testing)
+   ✓ O confiar en CA autofirmada
+   ✓ O usar certificado de CA real en producción
+
+==========================================
+🎉 ¡LISTO PARA COMENZAR!
+==========================================
+
+Tu infraestructura está 100% implementada.
+
+Siguiente: Cambiar credenciales y comenzar con PASO 1.
+
+Esperado:
+- 30 minutos: Cambiar credenciales + validar
+- 1 hora: Testing en desarrollo
+- 1 hora: Configurar Omada
+- 2 horas: Testing WiFi
+- 1 hora: Lanzar producción
+
+Total: ~6 horas para estar operativo.
+
+¡A por ello! 🚀

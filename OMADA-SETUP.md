@@ -1,1 +1,160 @@
-# =============================================================\n# CONFIGURACIÓN OMADA CONTROLLER\n# Fase 3: Configuración del Controlador Omada para RADIUS\n# =============================================================\n# ⚠️ IMPORTANTE: Esta es una GUÍA\n# Aplicar estos parámetros en la UI de Omada\n# =============================================================\n\n# =============================================================\n# PASO 1: CONFIGURAR SERVIDOR RADIUS\n# =============================================================\n# Ubicación en Omada: Settings → Authentication → RADIUS\n# \n# Parámetro                  | Valor              | Nota\n# --------------------------------|-------|-------|-------\n# RADIUS Server              | [IP_FREERADIUS]    | ⚠️ CAMBIAR\n# RADIUS Port (Auth)         | 1812               | UDP\n# RADIUS Port (Accounting)   | 1813               | UDP\n# Shared Secret              | W4nP7kL2xM9qR5tV3b | ⚠️ DEBE COINCIDIR\n# Timeout                    | 3                  | segundos\n# Retries                    | 3                  | intentos\n\n# Parámetro aleatorio generado: 2026-04-28\n# TODO: Cambiar al secret real configurado en clients.conf\n\nradius_server {\n    ip_address = \"[REEMPLAZAR_CON_IP_FREERADIUS]\"\n    auth_port = 1812\n    acct_port = 1813\n    shared_secret = \"W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p\"\n    timeout = 3\n    retries = 3\n}\n\n# =============================================================\n# PASO 2: CREAR POLÍTICA DE AUTENTICACIÓN\n# =============================================================\n# Ubicación: Settings → Authentication → Authentication Policy\n#\n# 1. Crear nueva política WiFi Enterprise\n# 2. Nombre: \"Enterprise_AD_Auth\"\n# 3. Tipo: RADIUS\n# 4. Servidor: Seleccionar servidor RADIUS configurado arriba\n# 5. Método: EAP (PEAP-MSCHAPv2)\n# 6. Validar nombre del servidor: Sí\n# 7. Permitir cambio de contraseña: Sí\n\nauthentication_policy {\n    name = \"Enterprise_AD_Auth\"\n    type = \"RADIUS\"\n    radius_server = \"[NOMBRE_DEL_SERVIDOR]\"\n    eap_method = \"PEAP\"\n    inner_eap = \"MSCHAPv2\"\n    server_name_validation = true\n    allow_pwd_change = true\n}\n\n# =============================================================\n# PASO 3: CREAR RED WiFi CON WPA2-ENTERPRISE\n# =============================================================\n# Ubicación: Wireless → SSIDs\n#\n# Crear SSID:\n# - SSID Name: \"Enterprise_Network\" (o tu nombre)\n# - Seguridad: WPA2-Enterprise\n# - Autenticación: Seleccionar política \"Enterprise_AD_Auth\"\n# - Cifrado: CCMP (AES)\n# - VLAN: [opcional, según tu red]\n\nwifi_network {\n    ssid = \"Enterprise_Network\"\n    security = \"WPA2-Enterprise\"\n    authentication_policy = \"Enterprise_AD_Auth\"\n    cipher = \"CCMP\"\n    # vlan_id = 10  # Opcional\n    broadcast_ssid = true\n    max_clients = 0  # Sin límite\n}\n\n# =============================================================\n# PASO 4: CONFIGURACIÓN DEL CLIENTE WiFi (Usuario Final)\n# =============================================================\n# Los clientes deben tener:\n#\n# Windows 10/11:\n#   - Seguridad WiFi: WPA2-Personal/Enterprise\n#   - Tipo de autenticación: Microsoft: EAP (PEAP)\n#   - EAP-PEAP: Validar certificado del servidor: DESACTIVADO\n#              (para certificados autofirmados)\n#   - Inner EAP: MSCHAPv2\n#   - Usuario: usuario@domain.com\n#   - Contraseña: contraseña de AD\n#\n# macOS:\n#   - WiFi → Avanzado\n#   - Seguridad: WPA2 Enterprise\n#   - User: usuario@domain\n#   - Password: contraseña de AD\n#   - Certificado: Confiar en CA autofirmada (si aplica)\n#\n# Linux:\n#   - wpa_supplicant.conf:\n#     network={\n#         ssid=\"Enterprise_Network\"\n#         key_mgmt=WPA-EAP\n#         eap=PEAP\n#         identity=\"usuario@domain\"\n#         password=\"contraseña\"\n#         phase1=\"peaplabel=0\"\n#         phase2=\"auth=MSCHAPV2\"\n#     }\n#\n# Android/iOS:\n#   - Seguir configuración del usuario (empresa proporcionará instrucciones)\n#   - Confiar en certificado de CA si es autofirmado\n\n# =============================================================\n# PASO 5: VALIDACIÓN Y TESTING\n# =============================================================\n#\n# 1. Conectar dispositivo de prueba a SSID \"Enterprise_Network\"\n# 2. Ingresar usuario AD: usuario@domain.com\n# 3. Ingresar contraseña: contraseña de AD\n# 4. Verificar en FreeRADIUS logs: docker logs -f freeradius\n# 5. Buscar: \"Access-Accept\" para autenticación exitosa\n# 6. Buscar: \"Access-Reject\" para fallos (verificar credenciales)\n\n# =============================================================\n# TROUBLESHOOTING OMADA\n# =============================================================\n#\n# Problema: \"RADIUS Authentication Failed\"\n# Soluciones:\n#   1. Verificar IP del servidor FreeRADIUS es accesible\n#   2. Verificar puerto 1812 UDP está abierto (firewall)\n#   3. Verificar shared_secret coincide exactamente\n#   4. Verificar usuario existe en AD y está habilitado\n#   5. Ver logs: docker logs freeradius | grep -i radius\n#\n# Problema: \"Certificate Validation Failed\"\n# Soluciones:\n#   1. Desactivar validación de certificado (testing)\n#   2. O confiar en CA autofirmada en cliente\n#   3. O usar certificado de CA confiable en producción\n#\n# Problema: \"Timeout\"\n# Soluciones:\n#   1. Aumentar timeout en Omada a 5-10 segundos\n#   2. Verificar latencia red → FreeRADIUS\n#   3. Verificar carga de FreeRADIUS: docker stats freeradius\n#\n# =============================================================\n"
+# Configuración Omada Controller
+## Fase 3: Configuración del Controlador Omada para RADIUS
+
+⚠️ IMPORTANTE: Esta es una GUÍA
+Aplicar estos parámetros en la UI de Omada
+
+=============================================================
+PASO 1: CONFIGURAR SERVIDOR RADIUS
+=============================================================
+
+Ubicación en Omada: Settings → Authentication → RADIUS
+
+Parámetro                  | Valor              | Nota
+-------------------------------|-------|-------|-------
+RADIUS Server              | [IP_FREERADIUS]    | ⚠️ CAMBIAR
+RADIUS Port (Auth)         | 1812               | UDP
+RADIUS Port (Accounting)   | 1813               | UDP
+Shared Secret              | W4nP7kL2xM9qR5tV3b | ⚠️ DEBE COINCIDIR
+Timeout                    | 3                  | segundos
+Retries                    | 3                  | intentos
+
+Parámetro aleatorio generado: 2026-04-28
+TODO: Cambiar al secret real configurado en clients.conf
+
+```yaml
+radius_server:
+  ip_address: "[REEMPLAZAR_CON_IP_FREERADIUS]"
+  auth_port: 1812
+  acct_port: 1813
+  shared_secret: "W4nP7kL2xM9qR5tV3b8jF0nZ2hC6mR1p"
+  timeout: 3
+  retries: 3
+```
+
+=============================================================
+PASO 2: CREAR POLÍTICA DE AUTENTICACIÓN
+=============================================================
+
+Ubicación: Settings → Authentication → Authentication Policy
+
+1. Crear nueva política WiFi Enterprise
+2. Nombre: "Enterprise_AD_Auth"
+3. Tipo: RADIUS
+4. Servidor: Seleccionar servidor RADIUS configurado arriba
+5. Método: EAP (PEAP-MSCHAPv2)
+6. Validar nombre del servidor: Sí
+7. Permitir cambio de contraseña: Sí
+
+```yaml
+authentication_policy:
+  name: "Enterprise_AD_Auth"
+  type: "RADIUS"
+  radius_server: "[NOMBRE_DEL_SERVIDOR]"
+  eap_method: "PEAP"
+  inner_eap: "MSCHAPv2"
+  server_name_validation: true
+  allow_pwd_change: true
+```
+
+=============================================================
+PASO 3: CREAR RED WiFi CON WPA2-ENTERPRISE
+=============================================================
+
+Ubicación: Wireless → SSIDs
+
+Crear SSID:
+- SSID Name: "Enterprise_Network" (o tu nombre)
+- Seguridad: WPA2-Enterprise
+- Autenticación: Seleccionar política "Enterprise_AD_Auth"
+- Cifrado: CCMP (AES)
+- VLAN: [opcional, según tu red]
+
+```yaml
+wifi_network:
+  ssid: "Enterprise_Network"
+  security: "WPA2-Enterprise"
+  authentication_policy: "Enterprise_AD_Auth"
+  cipher: "CCMP"
+  # vlan_id: 10  # Opcional
+  broadcast_ssid: true
+  max_clients: 0  # Sin límite
+```
+
+=============================================================
+PASO 4: CONFIGURACIÓN DEL CLIENTE WiFi (Usuario Final)
+=============================================================
+
+Los clientes deben tener:
+
+**Windows 10/11:**
+  - Seguridad WiFi: WPA2-Personal/Enterprise
+  - Tipo de autenticación: Microsoft: EAP (PEAP)
+  - EAP-PEAP: Validar certificado del servidor: DESACTIVADO
+             (para certificados autofirmados)
+  - Inner EAP: MSCHAPv2
+  - Usuario: usuario@domain.com
+  - Contraseña: contraseña de AD
+
+**macOS:**
+  - WiFi → Avanzado
+  - Seguridad: WPA2 Enterprise
+  - User: usuario@domain
+  - Password: contraseña de AD
+  - Certificado: Confiar en CA autofirmada (si aplica)
+
+**Linux:**
+  - wpa_supplicant.conf:
+    ```
+    network={
+        ssid="Enterprise_Network"
+        key_mgmt=WPA-EAP
+        eap=PEAP
+        identity="usuario@domain"
+        password="contraseña"
+        phase1="peaplabel=0"
+        phase2="auth=MSCHAPV2"
+    }
+    ```
+
+**Android/iOS:**
+  - Seguir configuración del usuario (empresa proporcionará instrucciones)
+  - Confiar en certificado de CA si es autofirmado
+
+=============================================================
+PASO 5: VALIDACIÓN Y TESTING
+=============================================================
+
+1. Conectar dispositivo de prueba a SSID "Enterprise_Network"
+2. Ingresar usuario AD: usuario@domain.com
+3. Ingresar contraseña: contraseña de AD
+4. Verificar en FreeRADIUS logs: docker logs -f freeradius
+5. Buscar: "Access-Accept" para autenticación exitosa
+6. Buscar: "Access-Reject" para fallos (verificar credenciales)
+
+=============================================================
+TROUBLESHOOTING OMADA
+=============================================================
+
+**Problema: "RADIUS Authentication Failed"**
+
+Soluciones:
+  1. Verificar IP del servidor FreeRADIUS es accesible
+  2. Verificar puerto 1812 UDP está abierto (firewall)
+  3. Verificar shared_secret coincide exactamente
+  4. Verificar usuario existe en AD y está habilitado
+  5. Ver logs: docker logs freeradius | grep -i radius
+
+**Problema: "Certificate Validation Failed"**
+
+Soluciones:
+  1. Desactivar validación de certificado (testing)
+  2. O confiar en CA autofirmada en cliente
+  3. O usar certificado de CA confiable en producción
+
+**Problema: "Timeout"**
+
+Soluciones:
+  1. Aumentar timeout en Omada a 5-10 segundos
+  2. Verificar latencia red → FreeRADIUS
+  3. Verificar carga de FreeRADIUS: docker stats freeradius
